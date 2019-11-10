@@ -817,6 +817,14 @@ void gl(py::module& m) {
         .def("draw", [](GL::Mesh& self, GL::AbstractShaderProgram& shader) {
             self.draw(shader);
         }, "Draw the mesh")
+        .def("is_indexed", &GL::Mesh::isIndexed, "Whether the mesh is indexed xxx")
+        .def("set_index_buffer", [](GL::Mesh& self, GL::Buffer& buffer, GLintptr offset, MeshIndexType type, UnsignedInt start, UnsignedInt end) {
+            self.setIndexBuffer(buffer, offset, type, start, end);
+
+            /* Keep a reference to the buffer to avoid it being deleted before
+               the mesh */
+            pyObjectHolderFor<GL::PyMeshHolder>(self).index_buffer = pyObjectFromInstance(buffer);
+        }, "Set index buffer", py::arg("buffer"), py::arg("offset"), py::arg("type"), py::arg("start") = 0, py::arg("end") = 0)
         /** @todo more */
 
         .def_property_readonly("buffers", [](GL::Mesh& self) {

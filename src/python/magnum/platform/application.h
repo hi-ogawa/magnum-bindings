@@ -48,7 +48,11 @@ template<class T, class Trampoline> void application(py::class_<T, Trampoline>& 
 
     py::class_<typename T::GLConfiguration> glConfiguration{c, "GLConfiguration", "OpenGL context configuration"};
     glConfiguration
-        .def(py::init());
+        .def(py::init())
+        .def_property("version", &T::GLConfiguration::version,
+            [](typename T::GLConfiguration& self, const GL::Version& version) {
+                self.setVersion(version);
+            }, "OpenGL version");
         /** @todo others */
 
     c

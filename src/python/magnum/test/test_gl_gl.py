@@ -270,6 +270,23 @@ class Mesh(GLTestCase):
         del mesh
         self.assertEqual(sys.getrefcount(buffer), buffer_refcount)
 
+    def test_set_index_buffer(self):
+        buffer = gl.Buffer()
+        buffer_refcount = sys.getrefcount(buffer)
+
+        # Adding a buffer to the mesh should increase its ref count
+        mesh = gl.Mesh()
+        self.assertEqual(mesh.is_indexed(), False)
+
+        mesh.set_index_buffer(buffer, 0, MeshIndexType.UNSIGNED_SHORT, 0, 2)
+        self.assertEqual(mesh.is_indexed(), True)
+        self.assertEqual(sys.getrefcount(buffer), buffer_refcount + 1)
+
+        # Deleting the mesh should decrease it again
+        del mesh
+        self.assertEqual(sys.getrefcount(buffer), buffer_refcount)
+
+
 class Renderbuffer(GLTestCase):
     def test_init(self):
         renderbuffer = gl.Renderbuffer()

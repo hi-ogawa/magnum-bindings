@@ -43,6 +43,7 @@ template<class T> struct PyMeshHolder: std::unique_ptr<T> {
     explicit PyMeshHolder(T* object): std::unique_ptr<T>{object} {}
 
     std::vector<pybind11::object> buffers;
+    pybind11::object index_buffer;
 };
 
 template<class T> struct PyFramebufferHolder: std::unique_ptr<T, PyNonDestructibleBaseDeleter<T, std::is_destructible<T>::value>> {
