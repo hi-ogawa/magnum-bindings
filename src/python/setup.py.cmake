@@ -59,8 +59,10 @@ if '${MAGNUM_BUILD_STATIC}' != 'ON':
 
 class TheExtensionIsAlreadyBuiltWhyThisHasToBeSoDamnComplicated(build_ext):
     def run(self):
-        for ext in self.extensions:
-            shutil.copyfile(extension_paths[ext.name], self.get_ext_fullpath(ext.name))
+        # Avoid shutil.SameFileError when "pip install -e build/src/python"
+        if not self.inplace:
+            for ext in self.extensions:
+                shutil.copyfile(extension_paths[ext.name], self.get_ext_fullpath(ext.name))
 
 setup(
     name='magnum',
