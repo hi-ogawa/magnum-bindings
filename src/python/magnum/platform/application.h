@@ -32,7 +32,11 @@
 
 namespace magnum { namespace platform {
 
-template<class T, class Trampoline> void application(py::class_<T, Trampoline>& c) {
+template<class T, class Trampoline> void application(
+        py::class_<T, Trampoline>& c,
+        std::vector<std::pair<typename T::Configuration::WindowFlag, const char*>>& windowFlagMap,
+        std::vector<std::pair<typename T::GLConfiguration::Flag, const char*>>& glConfigurationFlagMap) {
+
     py::class_<typename T::Configuration> configuration{c, "Configuration", "Configuration"};
     configuration
         .def(py::init())
@@ -43,8 +47,21 @@ template<class T, class Trampoline> void application(py::class_<T, Trampoline>& 
         .def_property("size", &T::Configuration::size,
             [](typename T::Configuration& self, const Vector2i& size) {
                 self.setSize(size);
-            }, "Window size");
+            }, "Window size")
+        .def_property("window_flags", &T::Configuration::windowFlags,
+            [](typename T::Configuration& self, const typename T::Configuration::WindowFlags& flags) {
+                self.setWindowFlags(flags);
+            }, "Window flags");
         /** @todo others */
+
+    py::class_<typename T::Configuration::WindowFlags> windowFlags{configuration, "WindowFlags", "Window flags"};
+    corrade::enumSetOperators(windowFlags);
+
+    py::enum_<typename T::Configuration::WindowFlag> windowFlag{configuration, "WindowFlag", "Window flag"};
+    corrade::enumOperators(windowFlag);
+    for (auto& pair : windowFlagMap) {
+        windowFlag.value(pair.second, pair.first);
+    }
 
     py::class_<typename T::GLConfiguration> glConfiguration{c, "GLConfiguration", "OpenGL context configuration"};
     glConfiguration
@@ -52,8 +69,21 @@ template<class T, class Trampoline> void application(py::class_<T, Trampoline>& 
         .def_property("version", &T::GLConfiguration::version,
             [](typename T::GLConfiguration& self, const GL::Version& version) {
                 self.setVersion(version);
-            }, "OpenGL version");
+            }, "OpenGL version")
+        .def_property("flags", &T::GLConfiguration::flags,
+            [](typename T::GLConfiguration& self, const typename T::GLConfiguration::Flags& flags) {
+                self.setFlags(flags);
+            }, "Flags");
         /** @todo others */
+
+    py::class_<typename T::GLConfiguration::Flags> glConfigurationFlags{glConfiguration, "Flags", "Context flags"};
+    corrade::enumSetOperators(glConfigurationFlags);
+
+    py::enum_<typename T::GLConfiguration::Flag> glConfigurationFlag{glConfiguration, "Flag", "Context flag"};
+    corrade::enumOperators(glConfigurationFlag);
+    for (auto& pair : glConfigurationFlagMap) {
+        glConfigurationFlag.value(pair.second, pair.first);
+    }
 
     c
         /* Constructor */

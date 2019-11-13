@@ -169,7 +169,38 @@ void glfw(py::module& m) {
     py::class_<PublicizedApplication::MouseMoveEvent, PublicizedApplication::InputEvent> mouseMoveEvent_{glfwApplication, "MouseMoveEvent", "Mouse move event"};
     py::class_<PublicizedApplication::MouseScrollEvent, PublicizedApplication::InputEvent> mouseScrollEvent_{glfwApplication, "MouseScrollEvent", "Mouse scroll event"};
 
-    application(glfwApplication);
+    std::vector<std::pair<PublicizedApplication::Configuration::WindowFlag, const char*>> windowFlagMap{
+        #define DEFINE_FLAG(flag, name) { PublicizedApplication::Configuration::WindowFlag::flag, #name },
+        DEFINE_FLAG(Fullscreen , FULLSCREEN  )
+        DEFINE_FLAG(Resizable  , RESIZABLE   )
+        DEFINE_FLAG(Hidden     , HIDDEN      )
+        #ifdef GLFW_MAXIMIZED
+        DEFINE_FLAG(Maximized  , MAXIMIZED   )
+        #endif
+        DEFINE_FLAG(Minimized  , MINIMIZED   )
+        DEFINE_FLAG(Floating   , FLOATING    )
+        DEFINE_FLAG(AutoIconify, AUTO_ICONIFY)
+        DEFINE_FLAG(Focused    , FOCUSED     )
+        #ifdef GLFW_NO_API
+        DEFINE_FLAG(Contextless, CONTEXTLESS )
+        #endif
+        #undef DEFINE_FLAG
+    };
+
+    std::vector<std::pair<PublicizedApplication::GLConfiguration::Flag, const char*>> glConfigurationFlagMap{
+        #define DEFINE_FLAG(flag, name) { PublicizedApplication::GLConfiguration::Flag::flag, #name },
+        DEFINE_FLAG(Debug            , DEBUG             )
+        DEFINE_FLAG(Stereo           , STEREO            )
+        #ifndef MAGNUM_TARGET_GLES
+        DEFINE_FLAG(ForwardCompatible, FORWARD_COMPATIBLE)
+        #endif
+        #ifdef GLFW_CONTEXT_NO_ERROR
+        DEFINE_FLAG(NoError          , NO_ERROR          )
+        #endif
+        #undef DEFINE_FLAG
+    };
+
+    application(glfwApplication, windowFlagMap, glConfigurationFlagMap);
     inputEvent(inputEvent_);
     keyEvent(keyEvent_);
     mouseEvent(mouseEvent_);

@@ -25,6 +25,7 @@
 
 #include <pybind11/pybind11.h>
 
+#include "corrade/EnumOperators.h"
 #include "magnum/bootstrap.h"
 
 namespace magnum { namespace platform {
@@ -32,8 +33,22 @@ namespace magnum { namespace platform {
 template<class T> void windowlessapplication(py::class_<T>& c) {
     py::class_<typename T::Configuration> configuration{c, "Configuration", "Configuration"};
     configuration
-        .def(py::init());
+        .def(py::init())
+        .def_property("flags", &T::Configuration::flags,
+            [](typename T::Configuration& self, const typename T::Configuration::Flags& flags) {
+                self.setFlags(flags);
+            }, "Flags");
         /** @todo others */
+
+    py::class_<typename T::Configuration::Flags> configurationFlags{configuration, "Flags", "Context flags"};
+    corrade::enumSetOperators(configurationFlags);
+
+    py::enum_<typename T::Configuration::Flag> configurationFlag{configuration, "Flag", "Context flag"};
+    corrade::enumOperators(configurationFlag);
+    configurationFlag.value("DEBUG",              T::Configuration::Flag::Debug);
+    #ifndef MAGNUM_TARGET_GLES
+    configurationFlag.value("FORWARD_COMPATIBLE", T::Configuration::Flag::ForwardCompatible);
+    #endif
 
     c
         /* Constructor */

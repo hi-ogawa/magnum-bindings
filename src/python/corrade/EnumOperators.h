@@ -40,6 +40,18 @@ template<class T> void enumOperators(pybind11::enum_<T>& e) {
         .def("__bool__", [](const T& a) { return bool(typename std::underlying_type<T>::type(a)); });
 }
 
+template<class T> void enumSetOperators(pybind11::class_<T>& c) {
+    c
+        .def(pybind11::init<>(), "Constructor")
+        .def(pybind11::init<typename T::Type>(), pybind11::arg("value"), "Constructor")
+        .def("__eq__", [](const T& a, const T& b) { return a == b; })
+        .def("__ne__", [](const T& a, const T& b) { return a != b; })
+        .def("__or__", [](const T& a, const T& b) { return a | b; })
+        .def("__and__", [](const T& a, const T& b) { return a & b; })
+        .def("__xor__", [](const T& a, const T& b) { return a ^ b; })
+        .def("__invert__", [](const T& a) { return ~a; });
+}
+
 }
 
 #endif

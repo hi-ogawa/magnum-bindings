@@ -174,7 +174,43 @@ void sdl2(py::module& m) {
     py::class_<PublicizedApplication::MouseMoveEvent, PublicizedApplication::InputEvent> mouseMoveEvent_{sdl2application, "MouseMoveEvent", "Mouse move event"};
     py::class_<PublicizedApplication::MouseScrollEvent, PublicizedApplication::InputEvent> mouseScrollEvent_{sdl2application, "MouseScrollEvent", "Mouse scroll event"};
 
-    application(sdl2application);
+    std::vector<std::pair<PublicizedApplication::Configuration::WindowFlag, const char*>> windowFlagMap{
+        #define DEFINE_FLAG(flag, name) { PublicizedApplication::Configuration::WindowFlag::flag, #name },
+        DEFINE_FLAG(Resizable  , RESIZABLE  )
+        DEFINE_FLAG(Contextless, CONTEXTLESS)
+        DEFINE_FLAG(OpenGL     , OPENGL     )
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        DEFINE_FLAG(Fullscreen , FULLSCREEN  )
+        DEFINE_FLAG(Borderless , BORDERLESS  )
+        DEFINE_FLAG(Hidden     , HIDDEN      )
+        DEFINE_FLAG(Maximized  , MAXIMIZED   )
+        DEFINE_FLAG(Minimized  , MINIMIZED   )
+        // NOTE: this will be added soon
+        // DEFINE_FLAG(Floating   , FLOATING    )
+        DEFINE_FLAG(MouseLocked, MOUSE_LOCKED)
+        #endif
+        // NOTE: Probably it's good to hide this? (otherwise noisy compiler warning)
+        // #ifdef MAGNUM_BUILD_DEPRECATED
+        // DEFINE_FLAG(AllowHighDpi, ALLOW_HIGH_DPI)
+        // #endif
+        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && SDL_MAJOR_VERSION*1000 + SDL_MINOR_VERSION*100 + SDL_PATCHLEVEL >= 2006
+        DEFINE_FLAG(Vulkan, VULKAN)
+        #endif
+        #undef DEFINE_FLAG
+    };
+
+    std::vector<std::pair<PublicizedApplication::GLConfiguration::Flag, const char*>> glConfigurationFlagMap{
+        #define DEFINE_FLAG(flag, name) { PublicizedApplication::GLConfiguration::Flag::flag, #name },
+        DEFINE_FLAG(Debug            , DEBUG             )
+        DEFINE_FLAG(RobustAccess     , ROBUST_ACCESS     )
+        DEFINE_FLAG(ResetIsolation   , RESET_ISOLATION   )
+        #ifndef MAGNUM_TARGET_GLES
+        DEFINE_FLAG(ForwardCompatible, FORWARD_COMPATIBLE)
+        #endif
+        #undef DEFINE_FLAG
+    };
+
+    application(sdl2application, windowFlagMap, glConfigurationFlagMap);
     inputEvent(inputEvent_);
     keyEvent(keyEvent_);
     mouseEvent(mouseEvent_);
